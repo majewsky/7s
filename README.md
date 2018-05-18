@@ -26,8 +26,8 @@ presenter.
 ## The slide deck file
 
 The slide deck is defined in a single file, which is a stream of Markdown
-documents separated by lines containing three dashes. The following is an
-example slide deck file with three slides:
+documents separated by lines containing exactly three dashes. The following is
+an example slide deck file with three slides:
 
 ```markdown
 # My first presentation

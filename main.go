@@ -23,6 +23,23 @@ import (
 	"os"
 )
 
+const usageMessage = "usage: 7s <slide-deck-file> <listen-address>\n e.g. 7s /path/to/slides.7s.md :8080"
+
 func main() {
-	fmt.Printf("%#v\n", os.Args)
+	if len(os.Args) == 2 && os.Args[1] == "--help" {
+		fmt.Fprintln(os.Stdout, usageMessage)
+		return
+	}
+	if len(os.Args) != 3 {
+		fmt.Fprintln(os.Stderr, usageMessage)
+		os.Exit(1)
+	}
+
+	deck, err := NewDeck(os.Args[1])
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+	}
+
+	//TODO DEBUG
+	fmt.Fprintf(os.Stdout, "deck = %#v\n", deck)
 }
