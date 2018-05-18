@@ -19,8 +19,12 @@
 package main
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
+	"log"
 	"os"
+	"strings"
 )
 
 const usageMessage = "usage: 7s <slide-deck-file> <listen-address>\n e.g. 7s /path/to/slides.7s.md :8080"
@@ -35,11 +39,35 @@ func main() {
 		os.Exit(1)
 	}
 
+	presenterKey, err := generatePresenterKey()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "could not generate secret key for presenter: %s\n", err.Error())
+	}
 	deck, err := NewDeck(os.Args[1])
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 	}
 
-	//TODO DEBUG
-	fmt.Fprintf(os.Stdout, "deck = %#v\n", deck)
+	log.Printf("serving %d slides with %d assets\n",
+		len(deck.SlidesHTML), len(deck.AssetPaths))
+	hostPort := os.Args[2]
+	if strings.HasPrefix(hostPort, ":") {
+		hostname, err := os.Hostname()
+		if err != nil {
+			hostname = "localhost"
+		}
+		hostPort = hostname + hostPort
+	}
+	log.Printf("private URL for presenter is http://%s/%s\n", hostPort, presenterKey)
+	log.Printf("public URL for audience is http://%s\n", hostPort)
+	log.Println("NOTE: URLs may differ when users reach 7s through reverse proxies or NAT")
+}
+
+func generatePresenterKey() (string, error) {
+	var buf [16]byte
+	_, err := rand.Read(buf[:])
+	if err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(buf[:]), nil
 }
