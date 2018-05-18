@@ -61,6 +61,12 @@ func main() {
 	log.Printf("private URL for presenter is http://%s/%s\n", hostPort, presenterKey)
 	log.Printf("public URL for audience is http://%s\n", hostPort)
 	log.Println("NOTE: URLs may differ when users reach 7s through reverse proxies or NAT")
+
+	s := Server{
+		Deck:         deck,
+		PresenterKey: presenterKey,
+	}
+	s.Run(os.Args[2])
 }
 
 func generatePresenterKey() (string, error) {
