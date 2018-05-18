@@ -23,22 +23,27 @@ import (
 	"strings"
 )
 
-const templMaster = `<!DOCTYPE html>
+const templOuter = `<!DOCTYPE html>
 <html>
 <head>
 	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<base href="%BASE%">
+	<link rel="stylesheet" type="text/css" href="7s.css">
 	<title>%TITLE%</title>
 </head>
-<body>%CONTENT%</body>`
+<body class="%BODYCLASS%">
+	%CONTENT%
+	<script type="text/javascript" src="7s.js"></script>
+</body>`
 
 //Page represents a full HTML page.
 type Page struct {
-	Content string
-	Title   string
-	BaseURL string
+	Content    string
+	Title      string
+	CSSClasses string
+	BaseURL    string
 }
 
 //WriteTo writes the page.
@@ -47,8 +52,9 @@ func (p Page) WriteTo(w http.ResponseWriter) {
 		p.BaseURL = "/"
 	}
 
-	out := templMaster
+	out := templOuter
 	out = strings.Replace(out, "%CONTENT%", p.Content, 1)
+	out = strings.Replace(out, "%BODYCLASS%", p.CSSClasses, 1)
 	out = strings.Replace(out, "%TITLE%", p.Title, 1)
 	out = strings.Replace(out, "%BASE%", p.BaseURL, 1)
 
@@ -56,3 +62,11 @@ func (p Page) WriteTo(w http.ResponseWriter) {
 	w.WriteHeader(200)
 	w.Write([]byte(out))
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+const templPresenter = `
+	<iframe id="prev" src="/slides/0"></iframe>
+	<iframe id="curr" src="/slides/0"></iframe>
+	<iframe id="next" src="/slides/0"></iframe>
+`
