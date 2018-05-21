@@ -1,0 +1,33 @@
+html {
+  margin: 0;
+  padding: 0;
+  font-size: 16px; /* = 1rem */
+}
+body {
+  margin: 0;
+  padding: 0;
+}
+
+iframe {
+  margin: 0;
+  border: 1px solid black;
+  padding: 0;
+  position: absolute;
+  top: 1rem;
+}
+
+iframe#prev {
+  left: 1vw;
+  width: 20vw;
+  height: 20vh;
+}
+iframe#curr {
+  left: 22vw;
+  width: 56vw;
+  height: 56vh;
+}
+iframe#next {
+  right: 1vw;
+  width: 20vw;
+  height: 20vh;
+}

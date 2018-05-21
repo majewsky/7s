@@ -58,6 +58,7 @@ func main() {
 		}
 		hostPort = hostname + hostPort
 	}
+	log.Printf("presenter key is %s\n", presenterKey)
 	log.Printf("private URL for presenter is http://%s/%s\n", hostPort, presenterKey)
 	log.Printf("public URL for audience is http://%s\n", hostPort)
 	log.Println("NOTE: URLs may differ when users reach 7s through reverse proxies or NAT")

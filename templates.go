@@ -69,4 +69,6 @@ const templPresenter = `
 	<iframe id="prev" src="/slides/0"></iframe>
 	<iframe id="curr" src="/slides/0"></iframe>
 	<iframe id="next" src="/slides/0"></iframe>
+
+	<script type="text/javascript">window.currentSlide = %SLIDENUM%;</script>
 `

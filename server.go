@@ -58,6 +58,8 @@ func (s *Server) Run(listenAddress string) error {
 	rGET.HandleFunc("/assets/{path:.+}", s.reqGetAsset)
 	rGET.HandleFunc("/"+s.PresenterKey, s.reqGetPresenter)
 
+	r.HandleFunc("/"+s.PresenterKey, s.reqPostPresenter).Methods("POST")
+
 	return http.ListenAndServe(listenAddress, r)
 }
 
@@ -116,10 +118,19 @@ func (s *Server) hardcodedAsset(path string) http.HandlerFunc {
 }
 
 func (s *Server) reqGetPresenter(w http.ResponseWriter, r *http.Request) {
+	s.currentMutex.RLock()
+	currentIdx := strconv.FormatUint(s.currentIdx, 10)
+	s.currentMutex.RUnlock()
 	Page{
-		Content:    templPresenter,
+		Content:    strings.Replace(templPresenter, "%SLIDENUM%", currentIdx, -1),
 		CSSClasses: "presenter",
 		Title:      "7s Presenter",
 		BaseURL:    "/presenter/", //load different CSS/JS here
 	}.WriteTo(w)
+}
+
+func (s *Server) reqPostPresenter(w http.ResponseWriter, r *http.Request) {
+	//TODO
+	w.WriteHeader(500)
+	w.Write([]byte("TODO"))
 }
