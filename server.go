@@ -49,10 +49,10 @@ func (s *Server) Run(listenAddress string) error {
 	r := mux.NewRouter().StrictSlash(true)
 
 	rGET := r.Methods("GET").Subrouter()
-	rGET.HandleFunc("/assets/7s.css", s.hardcodedAsset("assets/7s.css", []byte(cssSlides)))
-	rGET.HandleFunc("/assets/7s.js", s.hardcodedAsset("assets/7s.js", []byte(jsSlides)))
-	rGET.HandleFunc("/presenter/7s.css", s.hardcodedAsset("presenter/7s.css", []byte(cssPresenter)))
-	rGET.HandleFunc("/presenter/7s.js", s.hardcodedAsset("presenter/7s.js", []byte(jsPresenter)))
+	rGET.HandleFunc("/assets/7s.css", s.hardcodedAsset("static/slides.css"))
+	rGET.HandleFunc("/assets/7s.js", s.hardcodedAsset("static/slides.js"))
+	rGET.HandleFunc("/presenter/7s.css", s.hardcodedAsset("static/presenter.css"))
+	rGET.HandleFunc("/presenter/7s.js", s.hardcodedAsset("static/presenter.js"))
 
 	rGET.HandleFunc("/slides/{idx:[0-9]+}", s.reqGetSlide)
 	rGET.HandleFunc("/assets/{path:.+}", s.reqGetAsset)
@@ -91,13 +91,13 @@ func (s *Server) reqGetAsset(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, filepath.Join(s.Deck.BaseDirectory, path))
 }
 
-func (s *Server) hardcodedAsset(path string, contents []byte) http.HandlerFunc {
-	//This handler serves {slides,presenter}/7s.{js,css}. It usually uses the
-	//builtin files from static.go, but if an override file with the same path is
-	//present in the s.Deck.BaseDirectory, that one is served instead. This
+func (s *Server) hardcodedAsset(path string) http.HandlerFunc {
+	//This handler serves {assets,presenter}/7s.{js,css}. It usually uses the
+	//builtin files from static.go, but if the application is run from its Git
+	//repo, the corresponding source files from static/ are served instead. This
 	//behavior is intended for development, but may also be useful if users want
 	//to apply custom styles to their slides.
-	fsPath := filepath.Join(s.Deck.BaseDirectory, path)
+	fsPath := filepath.Join(filepath.Dir(os.Args[0]), "..", path)
 	return func(w http.ResponseWriter, r *http.Request) {
 		fi, err := os.Stat(fsPath)
 		if err == nil && fi.Mode().IsRegular() {
@@ -110,6 +110,7 @@ func (s *Server) hardcodedAsset(path string, contents []byte) http.HandlerFunc {
 			w.Header().Set("Content-Type", "text/javascript")
 		}
 		w.WriteHeader(200)
+		contents, _ := Asset(path)
 		w.Write(contents)
 	}
 }

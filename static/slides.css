@@ -1,0 +1,61 @@
+html {
+  font-size: 2vw;
+  min-height: 100vh;
+  overflow-y: hidden;
+}
+
+html, body, h1, h2, h3, h4, h5, h6, p {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+}
+
+body {
+  padding: 1rem;
+  padding-top: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0.5rem 0;
+}
+
+h1 {
+  font-size: 3rem;
+  line-height: 4rem;
+}
+h2 {
+  font-size: 2.5rem;
+  line-height: 3.5rem;
+}
+h3 {
+  font-size: 2rem;
+  line-height: 3rem;
+}
+h4 {
+  font-size: 1.5rem;
+  line-height: 2.5rem;
+}
+
+p, ul, ol, li {
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+
+p > img {
+  display: block;
+  margin: 0 auto;
+}
+
+body.no-slide {
+  width: 100vw;
+  height: 100vh;
+  background: black;
+  padding: 0;
+}
+body.no-slide p {
+  line-height: 100vh;
+  color: white;
+  font-size: 4rem;
+  text-align: center;
+}
+
