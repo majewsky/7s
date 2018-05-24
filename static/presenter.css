@@ -31,3 +31,30 @@ iframe#next {
   width: 20vw;
   height: 20vh;
 }
+
+button {
+  display: block;
+  position: absolute;
+  top: calc(56vh + 2rem);
+  margin: 0;
+  border: 1px solid black;
+  width: 20vw;
+  padding: 0 0.5rem;
+  background: #EEE;
+  line-height: 2rem;
+  width: 20vw;
+}
+
+button:hover, button:focus {
+  background: #DDD;
+}
+button:active {
+  background: #CCC;
+}
+
+button#btn-prev {
+  left: 22vw;
+}
+button#btn-next {
+  right: 22vw;
+}

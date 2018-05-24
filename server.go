@@ -19,7 +19,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -130,7 +132,21 @@ func (s *Server) reqGetPresenter(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) reqPostPresenter(w http.ResponseWriter, r *http.Request) {
-	//TODO
-	w.WriteHeader(500)
-	w.Write([]byte("TODO"))
+	requestedIdx, err := strconv.ParseUint(r.URL.Query().Get("set-slide"), 10, 64)
+	if err == nil {
+		log.Println("setting current slide = ", requestedIdx)
+		s.currentMutex.Lock()
+		s.currentIdx = requestedIdx
+		s.currentMutex.Unlock()
+	}
+
+	var outputData struct {
+		CurrentSlide uint64 `json:"current_slide"`
+	}
+	s.currentMutex.RLock()
+	outputData.CurrentSlide = s.currentIdx
+	s.currentMutex.RUnlock()
+
+	w.WriteHeader(200)
+	json.NewEncoder(w).Encode(outputData)
 }
