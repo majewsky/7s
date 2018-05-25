@@ -74,3 +74,8 @@ const templPresenter = `
 
 	<script type="text/javascript">window.currentSlide = %SLIDENUM%;</script>
 `
+
+const templAudience = `
+	<p id="noscript">Please enable JavaScript for this domain.</p>
+	<script type="text/javascript">window.currentSlide = %SLIDENUM%;</script>
+`

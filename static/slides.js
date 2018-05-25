@@ -8,8 +8,8 @@
     var tooSmallHeight = undefined;
     var tooLargeHeight = undefined;
 
-    console.clear();
-    console.log("desired height = " + desiredHeight);
+    // console.clear();
+    // console.log("desired height = " + desiredHeight);
     for (var iteration = 0; iteration < 50; iteration++) {
       //apply currentWidth
       var imageNodes = document.querySelectorAll("p > img");

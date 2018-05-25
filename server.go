@@ -27,7 +27,6 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"sync"
 
 	"github.com/gorilla/mux"
 )
@@ -36,21 +35,22 @@ import (
 type Server struct {
 	Deck         *Deck
 	PresenterKey string
-	currentIdx   uint64
-	currentMutex *sync.RWMutex
+	current      *Uint64Tracker
 }
 
 //Run starts the HTTP server in this goroutine. It does not return, except in
 //error cases.
 func (s *Server) Run(listenAddress string) error {
-	if s.currentMutex == nil {
-		s.currentIdx = 1
-		s.currentMutex = &sync.RWMutex{}
+	if s.current == nil {
+		s.current = &Uint64Tracker{}
+		s.current.Run(1)
 	}
 
 	r := mux.NewRouter().StrictSlash(true)
 
 	rGET := r.Methods("GET").Subrouter()
+	rGET.HandleFunc("/audience/7s.css", s.hardcodedAsset("static/audience.css"))
+	rGET.HandleFunc("/audience/7s.js", s.hardcodedAsset("static/audience.js"))
 	rGET.HandleFunc("/assets/7s.css", s.hardcodedAsset("static/slides.css"))
 	rGET.HandleFunc("/assets/7s.js", s.hardcodedAsset("static/slides.js"))
 	rGET.HandleFunc("/presenter/7s.css", s.hardcodedAsset("static/presenter.css"))
@@ -59,6 +59,8 @@ func (s *Server) Run(listenAddress string) error {
 	rGET.HandleFunc("/slides/{idx:[0-9]+}", s.reqGetSlide)
 	rGET.HandleFunc("/assets/{path:.+}", s.reqGetAsset)
 	rGET.HandleFunc("/"+s.PresenterKey, s.reqGetPresenter)
+	rGET.HandleFunc("/", s.reqGetAudience)
+	rGET.HandleFunc("/notify", s.reqGetNotify)
 
 	r.HandleFunc("/"+s.PresenterKey, s.reqPostPresenter).Methods("POST")
 
@@ -120,9 +122,7 @@ func (s *Server) hardcodedAsset(path string) http.HandlerFunc {
 }
 
 func (s *Server) reqGetPresenter(w http.ResponseWriter, r *http.Request) {
-	s.currentMutex.RLock()
-	currentIdx := strconv.FormatUint(s.currentIdx, 10)
-	s.currentMutex.RUnlock()
+	currentIdx := strconv.FormatUint(s.current.Get(), 10)
 	Page{
 		Content:    strings.Replace(templPresenter, "%SLIDENUM%", currentIdx, -1),
 		CSSClasses: "presenter",
@@ -135,18 +135,35 @@ func (s *Server) reqPostPresenter(w http.ResponseWriter, r *http.Request) {
 	requestedIdx, err := strconv.ParseUint(r.URL.Query().Get("set-slide"), 10, 64)
 	if err == nil {
 		log.Println("setting current slide = ", requestedIdx)
-		s.currentMutex.Lock()
-		s.currentIdx = requestedIdx
-		s.currentMutex.Unlock()
+		s.current.Set(requestedIdx)
 	}
 
-	var outputData struct {
-		CurrentSlide uint64 `json:"current_slide"`
-	}
-	s.currentMutex.RLock()
-	outputData.CurrentSlide = s.currentIdx
-	s.currentMutex.RUnlock()
+	reportCurrentSlide(w, s.current.Get())
+}
 
+func (s *Server) reqGetAudience(w http.ResponseWriter, r *http.Request) {
+	currentIdx := strconv.FormatUint(s.current.Get(), 10)
+
+	Page{
+		Content:    strings.Replace(templAudience, "%SLIDENUM%", currentIdx, -1),
+		CSSClasses: "audience",
+		Title:      "7s Presentation",
+		BaseURL:    "/audience/",
+	}.WriteTo(w)
+}
+
+//This is the endpoint that is long-polled by the audience UI. We use this to
+//tell the audience UI to advance to a different slide.
+func (s *Server) reqGetNotify(w http.ResponseWriter, r *http.Request) {
+	previousSlide, err := strconv.ParseUint(r.URL.Query().Get("current"), 10, 64)
+	if err == nil {
+		reportCurrentSlide(w, s.current.GetWhenDifferentFrom(previousSlide))
+	} else {
+		reportCurrentSlide(w, s.current.Get())
+	}
+}
+
+func reportCurrentSlide(w http.ResponseWriter, currentSlide uint64) {
 	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(outputData)
+	json.NewEncoder(w).Encode(map[string]uint64{"current_slide": currentSlide})
 }
