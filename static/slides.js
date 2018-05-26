@@ -68,6 +68,7 @@
   };
 
   resizeHandler();
+  window.onload = resizeHandler; //resize images again when all images loaded
   window.onresize = resizeHandler;
 
 })();
