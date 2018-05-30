@@ -21,3 +21,11 @@ This one has an image.
 ![Awesome image](./image.svg)
 
 Isn't this great?
+
+---
+
+The next slide has only an image, which causes special CSS rules for photo presentations to be applied.
+
+---
+
+![Awesome image](./image.svg)

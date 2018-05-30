@@ -1,5 +1,17 @@
 (function() {
 
+  //apply special styling for slides with only one image on them (i.e. <body>
+  //contains only one <p> and that <p> contains only one <img>)
+  var nodes1 = document.querySelectorAll("body > :not(script)");
+  if (nodes1.length == 1 && nodes1[0].tagName === "P") {
+    var nodes2 = document.querySelectorAll("body > p > *");
+    if (nodes2.length == 1 && nodes2[0].tagName === "IMG") {
+      document.body.classList.add("only-one-image");
+      //do not install the resize handler, we can handle this case without JS
+      return;
+    }
+  }
+
   var resizeHandler = function() {
     var currentWidth = 50;
     var tooSmallWidth = undefined;
